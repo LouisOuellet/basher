@@ -148,14 +148,17 @@ function printDate(){
 #==============================================================================
 
 function help(){
-  if [ "$verboseMode" == "true" ]; then
+  if [ "${verboseMode}" == "true" ]; then
     echo "Help" | dbg i s
   fi
   echo -e "
-Usage: ./$scriptName [options] IP/FQDN
+Usage: ./${scriptName} [options] ${helpUsage}
 
 Options:
-$helpOptions
+${helpOptions}
+
+Functions:
+${helpFunctions}
 "
 }
 

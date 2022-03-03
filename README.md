@@ -84,6 +84,7 @@ source ${scriptDirectory}/vendor/basher/basher
  * logFile
  * scriptDirectory
  * scriptName
+ * helpUsage
  * helpOptions
  * helpFunctions
 ## Functions
