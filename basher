@@ -1,0 +1,394 @@
+#!/bin/bash
+#==============================================================================
+#TITLE:            basher
+#DESCRIPTION:      This script helps create other bash script by adding a lot of components that can be sourced
+#AUTHOR:           Louis Ouellet
+#DATE:             2022-03-03
+#VERSION:          22.03-03
+
+#==============================================================================
+# BASH SETUP
+#==============================================================================
+
+# Initialize Timer
+SECOND=0
+
+# Set Bash
+set -o pipefail
+
+#==============================================================================
+# GATHERING SYSTEM INFORMATION
+#==============================================================================
+
+# Identify OS
+unameOut="$(uname -s)"
+case "${unameOut}" in
+  Linux*)     OS=Linux;;
+  Darwin*)    OS=Mac;;
+  CYGWIN*)    OS=Windows;;
+  MINGW*)     OS=MinGw;;
+  *)          OS="UNKNOWN:${unameOut}"
+esac
+
+# Identify Distribution
+Distribution=
+Architecture=
+PackageManager=
+case $OS in
+  Linux)
+    Distribution=$(hostnamectl | grep 'Operating System' | cut -d: -f2 | xargs)
+    Architecture=$(uname -p)
+    if [[ "$(whereis pacman | awk '{ print $2 }')" != '' ]]; then PackageManager="pacman"; fi
+    if [[ "$(whereis yum | awk '{ print $2 }')" != '' ]]; then PackageManager="yum"; fi
+    if [[ "$(whereis dnf | awk '{ print $2 }')" != '' ]]; then PackageManager="dnf"; fi
+    if [[ "$(whereis apt-get | awk '{ print $2 }')" != '' ]]; then PackageManager="apt-get"; fi
+    ;;
+  Mac)
+    Distribution=$(sw_vers -productVersion)
+    Architecture=$(uname -p)
+    PackageManager="brew"
+    ;;
+  *);;
+esac
+
+# Gathering Network
+if [ "$(whereis ifconfig | awk '{ print $1 }')" == '/sbin/ifconfig' ]; then
+  IP=$(ifconfig | grep "inet " | egrep -v 127.0.0.1 | awk '{ print $2 }' | tail -n 1)
+else
+  IP=$(ip a | grep "inet " | egrep -v "127.0.0.1" | head -n 1 | awk '{ print $2 }')
+fi
+
+#==============================================================================
+# FORMATTING
+#==============================================================================
+
+function format(){
+  # COLORS
+  formatBlack=$(tput setaf 0)           # Black
+  formatRed=$(tput setaf 1)             # Red
+  formatGreen=$(tput setaf 2)           # Green
+  formatYellow=$(tput setaf 3)          # Yellow
+  formatBlue=$(tput setaf 4)            # Blue
+  formatMagenta=$(tput setaf 5)         # Magenta
+  formatCyan=$(tput setaf 6)            # Cyan
+  formatWhite=$(tput setaf 7)           # White
+  formatGrey=$(tput setaf 8)            # Grey
+  formatLightRed=$(tput setaf 9)        # Light Red
+  formatLightGreen=$(tput setaf 10)     # Light Green
+  formatLightYellow=$(tput setaf 11)    # Light Yellow
+  formatLightBlue=$(tput setaf 12)      # Light Blue
+  formatLightMagenta=$(tput setaf 13)   # Light Magenta
+  formatLightCyan=$(tput setaf 14)      # Light Cyan
+  formatLightGrey=$(tput setaf 15)      # Light Grey
+  formatReset=$(tput sgr0)              # Reset to default color
+
+  # STYLES
+  formatBold=$(tput bold)
+  formatBlinking=$(tput blink)
+  formatDim=$(tput dim)
+}
+
+function clrformat(){
+  # COLORS
+  formatBlack=
+  formatRed=
+  formatGreen=
+  formatYellow=
+  formatBlue=
+  formatMagenta=
+  formatCyan=
+  formatWhite=
+  formatGrey=
+  formatLightRed=
+  formatLightGreen=
+  formatLightYellow=
+  formatLightBlue=
+  formatLightMagenta=
+  formatLightCyan=
+  formatLightGrey=
+  formatReset=
+
+  # STYLES
+  formatBold=
+  formatBlinking=
+  formatDim=
+}
+
+#==============================================================================
+# ELEMENTS
+#==============================================================================
+
+function elements(){
+  # BOXES
+  elementBoxGood="[${formatGreen}✓${formatReset}]"
+  elementBoxBad="[${formatRed}✗${formatReset}]"
+  elementBoxQuestion="[${formatMagenta}?${formatReset}]"
+  elementBoxInfo="[${formatCyan}i${formatReset}]"
+  elementBoxOutput="[${formatYellow}!${formatReset}]"
+
+  # FRAMES
+  elementFrameTopLeft="┌"
+  elementFrameTopRight="┐"
+  elementFrameBottomLeft="└"
+  elementFrameBottomRight="┘"
+  elementFrameHline="─"
+  elementFrameHlineStart="╾"
+  elementFrameHlineEnd="╼"
+  elementFrameVline="│"
+  elementFrameVlineStart="╿"
+  elementFrameVlineEnd="╽"
+}
+
+function printDate(){
+  printf "[$(date '+%Y-%m-%d %H:%M:%S')]"
+}
+
+#==============================================================================
+# HELPERS
+#==============================================================================
+
+function help(){
+  if [ "$verboseMode" == "true" ]; then
+    echo "Help" | dbg i s
+  fi
+  echo -e "
+Usage: ./$scriptName [options] IP/FQDN
+
+Options:
+$helpOptions
+"
+}
+
+function error(){
+  printf "FATAL ERROR: $1\n"
+  exit 0
+}
+
+function dbg(){
+  if [ "$1" != "" ] && [ "$2" != "" ]; then
+    case "$1" in
+      info|i)
+        dbgType=$elementBoxInfo
+        ;;
+      success|s)
+        dbgType=$elementBoxGood
+        ;;
+      error|e)
+        dbgType=$elementBoxBad
+        ;;
+      output|o)
+        dbgType=$elementBoxOutput
+        ;;
+      warning|w)
+        dbgType=$elementBoxOutput
+        ;;
+      question|q)
+        dbgType=$elementBoxQuestion
+        ;;
+    esac
+    case "$2" in
+      check|c|test|t)
+        dbgAction="[CHECK]"
+        ;;
+      start|s)
+        dbgAction="[START]"
+        ;;
+      run|r)
+        dbgAction="[ RUN ]"
+        ;;
+      empty|e)
+        dbgAction="[     ]"
+        ;;
+      output|o)
+        dbgAction="[ OUT ]"
+        ;;
+      timed|t)
+        dbgAction="[TIMED]"
+        ;;
+      variable|var|v)
+        dbgAction="[ VAR ]"
+        ;;
+    esac
+    while read DCMD; do
+      if [ "$3" != "" ]; then
+        LogFile=$3
+      fi
+			commandOutput=$(echo $DCMD | sed -e "s/\n/ /g")
+      if [ "$debugMode" != "true" ]; then
+        for string in ${protect[@]};do
+  				commandOutput=$(echo $commandOutput | sed -e "s/$string/xxx/g")
+  			done
+      fi
+      debugOutput=
+      if [ "$verboseMode" == "true" ]; then
+        debugOutput="${dbgType}$(printDate)${dbgAction} ${commandOutput}"
+      else
+        debugOutput="${commandOutput}"
+      fi
+      if [ "$debugMode" == "true" ]; then
+        printf "${debugOutput}\n" | tee -a $logFile
+      else
+        printf "${debugOutput}\n"
+      fi
+    done
+  else
+    error "Missing Argument(s)"
+  fi
+}
+
+function exec(){
+  if [ "$1" != "" ]; then
+    echo "exec $1" | dbg i s
+    if eval $1 2>&1 | dbg o o;then
+      echo "$1" | dbg s r
+    else
+      echo "$1" | dbg e r
+    fi
+  else
+    error "Missing Argument(s)"
+  fi
+}
+
+function pkg(){
+  if [ "$1" != "" ]; then
+    if [ "$verboseMode" == "true" ]; then
+      echo "pkg $1" | dbg i s
+    fi
+    case $OS in
+      Linux)
+        if [[ "$(whereis $1 | awk '{ print $2 }')" == '' ]]; then
+          case $PackageManager in
+            pacman)
+              exec "sudo pacman -S --noconfirm $1"
+              ;;
+            dnf)
+              exec "sudo dnf install -y $1"
+              ;;
+            yum)
+              exec "sudo yum install -y $1"
+              ;;
+            apt-get)
+              exec "sudo apt-get update"
+              exec "sudo apt-get install -y --fix-missing $1"
+              ;;
+            *)
+              echo "Unable to install $1" | dbg e e
+              echo "Unsupported Package Manager" | dbg e e
+              ;;
+          esac
+        fi
+        ;;
+      Mac)
+        if [[ $(brew list --version $1) == "" ]]; then
+          exec "brew install $1"
+        fi
+        ;;
+      *)
+        echo "Unable to install $1" | dbg e e
+        echo "Unsupported OS" | dbg e e
+        ;;
+    esac
+  else
+    error "Missing Argument(s)"
+  fi
+}
+
+function send(){
+  pkg s-nail
+  to=
+  files=
+  local OPTIND
+  while getopts ":a:" option; do
+  	case "${option}" in
+			a)
+        if [[ -f "${OPTARG}" ]]; then
+				      files=" -a \"${OPTARG}\""
+        fi
+				;;
+  	esac
+  done
+  shift $((OPTIND -1))
+  if [[ "${smtpTo}" != "" ]]; then to=$smtpTo; fi
+  if [[ "$3" != "" ]]; then to=$3; fi
+  # if [[ "${smtpHost}" == "" ]]; then
+    exec "echo \"$2\" | s-nail -s \"$1\"${files} $to"
+  # else
+  #   exec "echo \"$2\" | s-nail -s \"$1\" -S smtp-use-ssl -S ssl-rand-file=/tmp/mail.entropy -S smtp-auth=login -S smtp=\"smtps://${smtpHost}:${smtpPort}\" -S from=\"${smtpFrom}(${smtpName})\" -S smtp-auth-user=\"${smtpUsername}\" -S smtp-auth-password=\"${smtpPassword}\" -S ssl-verify=ignore${files} ${smtpTo}"
+  # fi
+}
+
+#==============================================================================
+# SETTINGS
+#==============================================================================
+
+function protectCMD(){
+	protect=(
+		$smtpHost
+		$smtpPort
+		$smtpUsername
+		$smtpPassword
+		$smtpName
+		$smtpFrom
+	)
+}
+
+function import(){
+  pkg jq
+  if [[ -f "settings.json" ]]; then
+    smtpHost=$(jq -r '.smtp.host' settings.json)
+    smtpPort=$(jq -r '.smtp.port' settings.json)
+    smtpUsername=$(jq -r '.smtp.username' settings.json)
+    smtpPassword=$(jq -r '.smtp.password' settings.json)
+    smtpName=$(jq -r '.smtp.name' settings.json)
+    smtpFrom=$(jq -r '.smtp.from' settings.json)
+    smtpTo=$(jq -r '.smtp.to' settings.json)
+    logDirectory=$(jq -r '.logs.directory' settings.json)
+    if [[ "${smtpHost}" == "null" ]]; then smtpHost=; fi
+    if [[ "${smtpPort}" == "null" ]]; then smtpPort=; fi
+    if [[ "${smtpUsername}" == "null" ]]; then smtpUsername=; fi
+    if [[ "${smtpPassword}" == "null" ]]; then smtpPassword=; fi
+    if [[ "${smtpName}" == "null" ]]; then smtpName=; fi
+    if [[ "${smtpFrom}" == "null" ]]; then smtpFrom=; fi
+    if [[ "${smtpTo}" == "null" ]]; then smtpTo=; fi
+    if [[ "${logDirectory}" == "null" ]]; then logDirectory=/tmp; fi
+  fi
+  case $OS in
+    Linux)
+      logFile="${logDirectory}/$(date +%s%N).log"
+      ;;
+    Mac)
+      logFile="${logDirectory}/$(date +%s).log"
+      ;;
+    *);;
+  esac
+	protectCMD
+}
+
+#==============================================================================
+# REQUIREMENTS
+#==============================================================================
+
+import
+
+#==============================================================================
+# FUNCTIONS
+#==============================================================================
+
+
+
+#==============================================================================
+# EXPORT VARIABLES
+#==============================================================================
+
+# export OS
+# export Distribution
+# export Architecture
+# export PackageManager
+# export smtpHost
+# export smtpPort
+# export smtpUsername
+# export smtpPassword
+# export smtpName
+# export smtpFrom
+# export smtpTo
+# export logDirectory
