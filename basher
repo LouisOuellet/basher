@@ -362,6 +362,41 @@ function send(){
   exec "echo \"$2\" | s-nail -s \"$1\"${parameters}${files} ${to}"
 }
 
+function lookup(){
+  option=
+  opt=
+  if [[ "$1" != "" ]]; then option=$1; fi
+  if [[ "$2" != "" ]]; then opt=$1; fi
+  case "${option}" in
+    v)
+      verboseMode=true
+      ;;
+    d)
+      debugMode=true
+      ;;
+    s)
+      debugSend=true
+      ;;
+    e)
+      debugError=true
+      ;;
+    f)
+      clrformat
+      elements
+      ;;
+    \? )
+      echo "Invalid option: ${opt}" 1>&2
+      help
+      exit 0
+      ;;
+    : )
+      echo "Invalid option: ${opt} requires an argument" 1>&2
+      help
+      exit 0
+      ;;
+  esac
+}
+
 #==============================================================================
 # SETTINGS
 #==============================================================================
@@ -448,32 +483,5 @@ export logDirectory
 
 format
 elements
-echo [1]$@
-opts=
-while getopts ":vedsf" option; do
-	case "${option}" in
-    v)
-      verboseMode=true
-      ;;
-    d)
-      debugMode=true
-      ;;
-    s)
-      debugSend=true
-      ;;
-    e)
-      debugError=true
-      ;;
-    f)
-      clrformat
-      elements
-      ;;
-    *)
-      opts="${opts} -${option} ${OPTARG}"
-      ;;
-	esac
-done
-echo [2]$@
-echo [1]$opts
-shift $((OPTIND -1))
+opts=":vedsf"
 export opts
