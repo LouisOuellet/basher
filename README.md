@@ -89,9 +89,6 @@ source ${scriptDirectory}/vendor/basher/basher
  * helpOptions
  * helpFunctions
 ## Functions
- * format : Sets all format variables
- * clrformat : Unsets all format variables
- * elements : Sets all element variables
  * help : Display help
  * error : Interrupt script and execute help
  * dbg : When string is piped into this function, it adds some debugging data.
