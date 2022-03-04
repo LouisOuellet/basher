@@ -476,6 +476,9 @@ export smtpName
 export smtpFrom
 export smtpTo
 export logDirectory
+export helpUsage
+export helpOptions
+export helpFunctions
 
 #==============================================================================
 # RUN OPTIONS & FUNCTIONS
