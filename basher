@@ -172,6 +172,7 @@ Options:
 -v                     => Enable Verbose Mode
 -d                     => Enable Debug Mode
 -e                     => Compile errors and warnings after execution
+                          (Requires Verbose and Debug mode enabled)
 -s                     => Send report via email
 -f                     => Disable all formatting
 "
