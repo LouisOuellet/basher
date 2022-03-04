@@ -64,10 +64,11 @@ fi
 
 # Identify Script Directory
 if [[ "$OS" != "Mac" ]]; then
-  scriptDirectory=$(dirname $(readlink -f $0))
+  scriptDirectory="$(dirname $(readlink -f $0))/"
 else
-  scriptDirectory=$(dirname $(greadlink -f $0))
+  scriptDirectory="$(dirname $(greadlink -f $0))/"
 fi
+if [[ "$scriptDirectory" == "/" ]]; then scriptDirectory=; fi
 
 # Script name
 scriptName=$(echo $0 | sed -e 's@.*/@@')
