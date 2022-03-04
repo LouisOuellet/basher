@@ -364,9 +364,11 @@ function send(){
 
 function lookup(){
   option=
-  opt=
+  arg=
   if [[ "$1" != "" ]]; then option=$1; fi
-  if [[ "$2" != "" ]]; then opt=$2; fi
+  if [[ "$2" != "" ]]; then arg=$2; fi
+  echo [option]$option
+  echo [arg]$arg
   case "${option}" in
     v)
       verboseMode=true
