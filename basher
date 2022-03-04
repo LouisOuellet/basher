@@ -448,7 +448,8 @@ export logDirectory
 
 format
 elements
-echo $@
+echo [1]$@
+opts=
 while getopts ":vedsf" option; do
 	case "${option}" in
     v)
@@ -467,8 +468,11 @@ while getopts ":vedsf" option; do
       clrformat
       elements
       ;;
+    *)
+      opts="${opts} -${option} ${OPTARG}"
+      ;;
 	esac
 done
-echo $@
+echo [2]$@
 shift $((OPTIND -1))
-export OPTIND
+export opts
