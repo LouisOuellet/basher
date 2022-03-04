@@ -359,6 +359,10 @@ function send(){
     fi
   fi
   if [[ "$3" != "" ]]; then to=$3; fi
+  if [[ "$to" == "" ]]; then
+    echo "Where do you want to send this email?"
+    read to
+  fi
   exec "echo \"$2\" | s-nail -s \"$1\"${parameters}${files} ${to}"
 }
 
@@ -480,6 +484,10 @@ export logDirectory
 export helpUsage
 export helpOptions
 export helpFunctions
+export verboseMode
+export debugMode
+export debugError
+export debugSend
 
 #==============================================================================
 # RUN OPTIONS & FUNCTIONS
