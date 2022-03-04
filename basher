@@ -366,7 +366,7 @@ function lookup(){
   option=
   opt=
   if [[ "$1" != "" ]]; then option=$1; fi
-  if [[ "$2" != "" ]]; then opt=$1; fi
+  if [[ "$2" != "" ]]; then opt=$2; fi
   case "${option}" in
     v)
       verboseMode=true
@@ -386,14 +386,14 @@ function lookup(){
       ;;
     \? )
       echo
-      echo "Invalid option: ${opt}" 1>&2
+      echo "Invalid option: ${option}" 1>&2
       echo
       help
       exit 0
       ;;
     : )
       echo
-      echo "Invalid option: ${opt} requires an argument" 1>&2
+      echo "Invalid option: ${option} requires an argument" 1>&2
       echo
       help
       exit 0
