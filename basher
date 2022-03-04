@@ -384,9 +384,16 @@ function lookup(){
       clrformat
       elements
       ;;
+    -*)
+      echo
+      echo "Invalid option: --${option}" 1>&2
+      echo
+      help
+      exit 0
+      ;;
     *)
       echo
-      echo "Invalid option: ${option}" 1>&2
+      echo "Invalid option: -${option}" 1>&2
       echo
       help
       exit 0
