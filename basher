@@ -467,27 +467,27 @@ import
 # EXPORT VARIABLES
 #==============================================================================
 
-export OS
-export Distribution
-export Architecture
-export PackageManager
-export scriptDirectory
-export scriptName
-export smtpHost
-export smtpPort
-export smtpUsername
-export smtpPassword
-export smtpName
-export smtpFrom
-export smtpTo
-export logDirectory
-export helpUsage
-export helpOptions
-export helpFunctions
-export verboseMode
-export debugMode
-export debugError
-export debugSend
+# export OS
+# export Distribution
+# export Architecture
+# export PackageManager
+# export scriptDirectory
+# export scriptName
+# export smtpHost
+# export smtpPort
+# export smtpUsername
+# export smtpPassword
+# export smtpName
+# export smtpFrom
+# export smtpTo
+# export logDirectory
+# export helpUsage
+# export helpOptions
+# export helpFunctions
+# export verboseMode
+# export debugMode
+# export debugError
+# export debugSend
 
 #==============================================================================
 # RUN OPTIONS & FUNCTIONS
