@@ -424,6 +424,8 @@ export OS
 export Distribution
 export Architecture
 export PackageManager
+export scriptDirectory
+export scriptName
 export smtpHost
 export smtpPort
 export smtpUsername
