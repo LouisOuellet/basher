@@ -170,6 +170,12 @@ Usage: ./${scriptName} [options] ${helpUsage}
   if [[ "${helpOptions}" != "" ]]; then
     helpContent="${helpContent}
 Options:
+
+-v                     => Enable Verbose Mode
+-d                     => Enable Debug Mode
+-e                     => Compile errors and warnings after execution
+-s                     => Send report via email
+-f                     => Disable all formatting
 ${helpOptions}
 "
   fi
@@ -435,3 +441,32 @@ export smtpName
 export smtpFrom
 export smtpTo
 export logDirectory
+
+#==============================================================================
+# RUN OPTIONS & FUNCTIONS
+#==============================================================================
+
+format
+elements
+
+while getopts ":vedsf" option; do
+	case "${option}" in
+    v)
+      verboseMode=true
+      ;;
+    d)
+      debugMode=true
+      ;;
+    s)
+      debugSend=true
+      ;;
+    e)
+      debugError=true
+      ;;
+    f)
+      clrformat
+      elements
+      ;;
+	esac
+done
+shift $((OPTIND -1))
