@@ -449,7 +449,7 @@ export logDirectory
 format
 elements
 echo $OPTIND
-
+echo getopts
 while getopts ":vedsf" option; do
 	case "${option}" in
     v)
