@@ -164,20 +164,20 @@ function printDate(){
 
 function help(){
   if [[ "${debugMode}" == "true" ]]; then echo "Help" | dbg i s; fi
-  helpContent="
-Usage: ./${scriptName} [options] ${helpUsage}
+  helpContent="Usage: ./${scriptName} [options] ${helpUsage}
 "
-  if [[ "${helpOptions}" != "" ]]; then
-    helpContent="${helpContent}
+  helpContent="${helpContent}
 Options:
 
 -v                     => Enable Verbose Mode
 -d                     => Enable Debug Mode
 -e                     => Compile errors and warnings after execution
+                          (Requires Verbose and Debug mode enabled)
 -s                     => Send report via email
 -f                     => Disable all formatting
-${helpOptions}
 "
+  if [[ "${helpOptions}" != "" ]]; then
+    helpContent="${helpContent}${helpOptions}"
   fi
   if [[ "${helpFunctions}" != "" ]]; then
     helpContent="${helpContent}
@@ -359,7 +359,47 @@ function send(){
     fi
   fi
   if [[ "$3" != "" ]]; then to=$3; fi
+  if [[ "$to" == "" ]]; then
+    echo "Where do you want to send this email?"
+    read to
+  fi
   exec "echo \"$2\" | s-nail -s \"$1\"${parameters}${files} ${to}"
+}
+
+function lookup(){
+  option=
+  arg=
+  if [[ "$1" != "" ]]; then option=$1; fi
+  if [[ "$2" != "" ]]; then arg=$2; fi
+  case "${option}" in
+    v)
+      verboseMode=true
+      ;;
+    d)
+      debugMode=true
+      ;;
+    s)
+      debugSend=true
+      ;;
+    e)
+      debugError=true
+      ;;
+    f)
+      clrformat
+      elements
+      ;;
+    *)
+      echo
+      if [[ "${option}" == "?" ]]; then
+        echo "Invalid option: -${arg}" 1>&2
+      else
+        echo "Invalid option: -${option}" 1>&2
+      fi
+      echo
+      help
+      exit 0
+      ;;
+  esac
 }
 
 #==============================================================================
@@ -441,6 +481,13 @@ export smtpName
 export smtpFrom
 export smtpTo
 export logDirectory
+export helpUsage
+export helpOptions
+export helpFunctions
+export verboseMode
+export debugMode
+export debugError
+export debugSend
 
 #==============================================================================
 # RUN OPTIONS & FUNCTIONS
@@ -448,25 +495,5 @@ export logDirectory
 
 format
 elements
-
-while getopts ":vedsf" option; do
-	case "${option}" in
-    v)
-      verboseMode=true
-      ;;
-    d)
-      debugMode=true
-      ;;
-    s)
-      debugSend=true
-      ;;
-    e)
-      debugError=true
-      ;;
-    f)
-      clrformat
-      elements
-      ;;
-	esac
-done
-shift $((OPTIND -1))
+opts=":vedsf-:"
+export opts
