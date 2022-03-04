@@ -386,7 +386,7 @@ function lookup(){
       ;;
     -*)
       echo
-      echo "Invalid - option: --${option}" 1>&2
+      echo "Invalid option: --${option}" 1>&2
       echo
       help
       exit 0
