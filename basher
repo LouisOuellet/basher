@@ -470,3 +470,4 @@ while getopts ":vedsf" option; do
 	esac
 done
 shift $((OPTIND -1))
+export OPTIND
