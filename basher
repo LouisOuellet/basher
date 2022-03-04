@@ -386,18 +386,11 @@ function lookup(){
       ;;
     *)
       echo
-      echo "Invalid gg option: ${option}" 1>&2
+      echo "Invalid option: ${option}" 1>&2
       echo
       help
       exit 0
       ;;
-    # : )
-    #   echo
-    #   echo "Invalid option: ${option} requires an argument" 1>&2
-    #   echo
-    #   help
-    #   exit 0
-    #   ;;
   esac
 }
 
@@ -490,5 +483,5 @@ export helpFunctions
 
 format
 elements
-opts=":vedsf"
+opts=":vedsf-:"
 export opts
