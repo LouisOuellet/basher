@@ -164,8 +164,7 @@ function printDate(){
 
 function help(){
   if [[ "${debugMode}" == "true" ]]; then echo "Help" | dbg i s; fi
-  helpContent="
-Usage: ./${scriptName} [options] ${helpUsage}
+  helpContent="Usage: ./${scriptName} [options] ${helpUsage}
 "
   helpContent="${helpContent}
 Options:
