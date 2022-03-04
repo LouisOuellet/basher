@@ -388,7 +388,11 @@ function lookup(){
       ;;
     *)
       echo
-      echo "Invalid option: -${option}" 1>&2
+      if [[ "${option}" == "?" ]]; then
+        echo "Invalid option: -${arg}" 1>&2
+      else
+        echo "Invalid option: -${option}" 1>&2
+      fi
       echo
       help
       exit 0
