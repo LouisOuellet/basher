@@ -474,5 +474,6 @@ while getopts ":vedsf" option; do
 	esac
 done
 echo [2]$@
+echo [1]$opts
 shift $((OPTIND -1))
 export opts
