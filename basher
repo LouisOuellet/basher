@@ -167,8 +167,7 @@ function help(){
   helpContent="
 Usage: ./${scriptName} [options] ${helpUsage}
 "
-  if [[ "${helpOptions}" != "" ]]; then
-    helpContent="${helpContent}
+  helpContent="${helpContent}
 Options:
 
 -v                     => Enable Verbose Mode
@@ -176,8 +175,9 @@ Options:
 -e                     => Compile errors and warnings after execution
 -s                     => Send report via email
 -f                     => Disable all formatting
-${helpOptions}
 "
+  if [[ "${helpOptions}" != "" ]]; then
+    helpContent="${helpContent}${helpOptions}"
   fi
   if [[ "${helpFunctions}" != "" ]]; then
     helpContent="${helpContent}
