@@ -72,6 +72,7 @@ source ${scriptDirectory}/vendor/basher/basher
 ### Settings
  * smtpHost
  * smtpPort
+ * smtpSecurity
  * smtpUsername
  * smtpPassword
  * smtpName
@@ -84,15 +85,16 @@ source ${scriptDirectory}/vendor/basher/basher
  * logFile
  * scriptDirectory
  * scriptName
+ * helpUsage
  * helpOptions
  * helpFunctions
 ## Functions
- * format
- * clrformat
- * elements
- * help
- * error
- * dbg
- * exec
- * pkg
- * send
+ * format : Sets all format variables
+ * clrformat : Unsets all format variables
+ * elements : Sets all element variables
+ * help : Display help
+ * error : Interrupt script and execute help
+ * dbg : When string is piped into this function, it adds some debugging data.
+ * exec : Execute command through the debugger
+ * pkg : Install a package
+ * send : Send an email
