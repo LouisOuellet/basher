@@ -72,6 +72,7 @@ source ${scriptDirectory}/vendor/basher/basher
 ### Settings
  * smtpHost
  * smtpPort
+ * smtpSecurity
  * smtpUsername
  * smtpPassword
  * smtpName

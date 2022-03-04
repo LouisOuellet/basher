@@ -59,6 +59,20 @@ else
 fi
 
 #==============================================================================
+# GATHERING SCRIPT INFORMATION
+#==============================================================================
+
+# Identify Script Directory
+if [[ "$OS" != "Mac" ]]; then
+  scriptDirectory=$(dirname $(readlink -f $0))
+else
+  scriptDirectory=$(dirname $(greadlink -f $0))
+fi
+
+# Script name
+scriptName=$(echo $0 | sed -e 's@.*/@@')
+
+#==============================================================================
 # FORMATTING
 #==============================================================================
 
@@ -148,18 +162,23 @@ function printDate(){
 #==============================================================================
 
 function help(){
-  if [ "${verboseMode}" == "true" ]; then
-    echo "Help" | dbg i s
-  fi
-  echo -e "
+  if [[ "${debugMode}" == "true" ]]; then echo "Help" | dbg i s; fi
+  helpContent="
 Usage: ./${scriptName} [options] ${helpUsage}
-
+"
+  if [[ "${helpOptions}" != "" ]]; then
+    helpContent="${helpContent}
 Options:
 ${helpOptions}
-
+"
+  fi
+  if [[ "${helpFunctions}" != "" ]]; then
+    helpContent="${helpContent}
 Functions:
 ${helpFunctions}
 "
+  fi
+  echo -e "${helpContent}"
 }
 
 function error(){
@@ -240,9 +259,9 @@ function dbg(){
 }
 
 function exec(){
-  if [ "$1" != "" ]; then
+  if [[ "$1" != "" ]]; then
     echo "exec $1" | dbg i s
-    if eval $1 2>&1 | dbg o o;then
+    if eval $1 2>&1 | dbg o o; then
       echo "$1" | dbg s r
     else
       echo "$1" | dbg e r
@@ -254,9 +273,7 @@ function exec(){
 
 function pkg(){
   if [ "$1" != "" ]; then
-    if [ "$verboseMode" == "true" ]; then
-      echo "pkg $1" | dbg i s
-    fi
+    if [[ "$debugMode" == "true" ]]; then echo "pkg $1" | dbg i s; fi
     case $OS in
       Linux)
         if [[ "$(whereis $1 | awk '{ print $2 }')" == '' ]]; then
@@ -300,6 +317,7 @@ function send(){
   pkg s-nail
   to=
   files=
+  parameters=
   local OPTIND
   while getopts ":a:" option; do
   	case "${option}" in
@@ -312,12 +330,29 @@ function send(){
   done
   shift $((OPTIND -1))
   if [[ "${smtpTo}" != "" ]]; then to=$smtpTo; fi
+  if [[ "${smtpFrom}" != "" ]]; then
+    if [[ "${smtpName}" != "" ]]; then
+      parameters="${parameters} -S from=\"${smtpFrom}<${smtpName}>\""
+    else
+      parameters="${parameters} -S from=\"${smtpFrom}\""
+    fi
+  fi
+  if [[ "${smtpHost}" != "" ]] && [[ "${smtpPort}" != "" ]]; then
+    if [[ "${smtpSecurity}" != "" ]]; then
+      if [[ "${smtpSecurity}" != "starttls" ]]; then
+        parameters="${parameters} -S smtp-use-ssl -S ssl-verify=ignore -S ssl-rand-file=/tmp/mail.entropy -S smtp=\"smtps://${smtpHost}:${smtpPort}\""
+      else
+        parameters="${parameters} -S smtp-use-starttls -S smtp=\"smtp://${smtpHost}:${smtpPort}\""
+      fi
+    else
+      parameters="${parameters} -S smtp=\"smtp://${smtpHost}:${smtpPort}\""
+    fi
+    if [[ "${smtpUsername}" != "" ]] && [[ "${smtpPassword}" != "" ]]; then
+      parameters="${parameters} -S smtp-auth=login -S smtp-auth-user=\"${smtpUsername}\" -S smtp-auth-password=\"${smtpPassword}\""
+    fi
+  fi
   if [[ "$3" != "" ]]; then to=$3; fi
-  # if [[ "${smtpHost}" == "" ]]; then
-    exec "echo \"$2\" | s-nail -s \"$1\"${files} $to"
-  # else
-  #   exec "echo \"$2\" | s-nail -s \"$1\" -S smtp-use-ssl -S ssl-rand-file=/tmp/mail.entropy -S smtp-auth=login -S smtp=\"smtps://${smtpHost}:${smtpPort}\" -S from=\"${smtpFrom}(${smtpName})\" -S smtp-auth-user=\"${smtpUsername}\" -S smtp-auth-password=\"${smtpPassword}\" -S ssl-verify=ignore${files} ${smtpTo}"
-  # fi
+  exec "echo \"$2\" | s-nail -s \"$1\"${parameters}${files} ${to}"
 }
 
 #==============================================================================
@@ -328,6 +363,7 @@ function protectCMD(){
 	protect=(
 		$smtpHost
 		$smtpPort
+    $smtpSecurity
 		$smtpUsername
 		$smtpPassword
 		$smtpName
@@ -340,6 +376,7 @@ function import(){
   if [[ -f "settings.json" ]]; then
     smtpHost=$(jq -r '.smtp.host' settings.json)
     smtpPort=$(jq -r '.smtp.port' settings.json)
+    smtpSecurity=$(jq -r '.smtp.security' settings.json)
     smtpUsername=$(jq -r '.smtp.username' settings.json)
     smtpPassword=$(jq -r '.smtp.password' settings.json)
     smtpName=$(jq -r '.smtp.name' settings.json)
@@ -383,15 +420,15 @@ import
 # EXPORT VARIABLES
 #==============================================================================
 
-# export OS
-# export Distribution
-# export Architecture
-# export PackageManager
-# export smtpHost
-# export smtpPort
-# export smtpUsername
-# export smtpPassword
-# export smtpName
-# export smtpFrom
-# export smtpTo
-# export logDirectory
+export OS
+export Distribution
+export Architecture
+export PackageManager
+export smtpHost
+export smtpPort
+export smtpUsername
+export smtpPassword
+export smtpName
+export smtpFrom
+export smtpTo
+export logDirectory
