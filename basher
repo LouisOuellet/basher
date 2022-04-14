@@ -330,7 +330,7 @@ function send(){
   	case "${option}" in
 			a)
         if [[ -f "${OPTARG}" ]]; then
-				      files=" -a \"${OPTARG}\""
+				      files="${files} -a \"${OPTARG}\""
         fi
 				;;
   	esac
