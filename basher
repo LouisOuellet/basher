@@ -52,7 +52,7 @@ case $OS in
 esac
 
 # Gathering Network
-if [ "$(whereis ifconfig | awk '{ print $1 }')" == '/sbin/ifconfig' ]; then
+if [[ "$(whereis ifconfig | awk '{ print $1 }')" == '/sbin/ifconfig' ]] || [[ "$OS" == "Mac" ]]; then
   IP=$(ifconfig | grep "inet " | egrep -v 127.0.0.1 | awk '{ print $2 }' | tail -n 1)
 else
   IP=$(ip a | grep "inet " | egrep -v "127.0.0.1" | head -n 1 | awk '{ print $2 }')
@@ -169,10 +169,10 @@ function help(){
   helpContent="${helpContent}
 Options:
 
--v                     => Enable Verbose Mode
 -d                     => Enable Debug Mode
+-v                     => Enable Verbose Mode
 -e                     => Compile errors and warnings after execution
-                          (Requires Verbose and Debug mode enabled)
+                          (Requires Verbose mode enabled)
 -s                     => Send report via email
 -f                     => Disable all formatting
 "
@@ -330,7 +330,7 @@ function send(){
   	case "${option}" in
 			a)
         if [[ -f "${OPTARG}" ]]; then
-				      files=" -a \"${OPTARG}\""
+				      files="${files} -a \"${OPTARG}\""
         fi
 				;;
   	esac
@@ -458,42 +458,9 @@ function import(){
 import
 
 #==============================================================================
-# FUNCTIONS
-#==============================================================================
-
-
-
-#==============================================================================
-# EXPORT VARIABLES
-#==============================================================================
-
-export OS
-export Distribution
-export Architecture
-export PackageManager
-export scriptDirectory
-export scriptName
-export smtpHost
-export smtpPort
-export smtpUsername
-export smtpPassword
-export smtpName
-export smtpFrom
-export smtpTo
-export logDirectory
-export helpUsage
-export helpOptions
-export helpFunctions
-export verboseMode
-export debugMode
-export debugError
-export debugSend
-
-#==============================================================================
-# RUN OPTIONS & FUNCTIONS
+# OPTIONS & INIT FORMATTING
 #==============================================================================
 
 format
 elements
 opts=":vedsf-:"
-export opts
